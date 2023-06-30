@@ -20,10 +20,6 @@ def processing(df, steps):
 
     stats_df = df.describe().T
 
-    number_of_timestamps = stats_df['count'][0]
-    recording_duration = stats_df['max'][0] - stats_df['min'][0]
-    steps_count = stats_df['mean'][4]
-
     accx_mean = stats_df['mean'][1]
     accx_std = stats_df['std'][1]
     accx_min = stats_df['min'][1]
@@ -52,24 +48,18 @@ def processing(df, steps):
     N_median = stats_df['50%'][5]
     N_interval = N_max - N_min
 
-    activity_type = 1 if 'walk' in df.name else 0
-
-    row = [number_of_timestamps, recording_duration, steps_count,
-           accx_mean, accx_std, accx_min, accx_max, accx_median, accx_interval,
+    row = [accx_mean, accx_std, accx_min, accx_max, accx_median, accx_interval,
            accy_mean, accy_std, accy_min, accy_max, accy_median, accy_interval,
            accz_mean, accz_std, accz_min, accz_max, accz_median, accz_interval,
-           N_mean, N_std, N_min, N_max, N_median, N_interval, activity_type]
+           N_mean, N_std, N_min, N_max, N_median, N_interval]
 
-    stats_dataframe = pd.DataFrame(row, columns=['number_of_timestamps', 'recording_duration', 'steps_count',
-                                                 'accx_mean', 'accx_std', 'accx_min', 'accx_max', 'accx_median',
+    stats_dataframe = pd.DataFrame(row, columns=['accx_mean', 'accx_std', 'accx_min', 'accx_max', 'accx_median',
                                                  'accx_interval',
                                                  'accy_mean', 'accy_std', 'accy_min', 'accy_max', 'accy_median',
                                                  'accy_interval',
                                                  'accz_mean', 'accz_std', 'accz_min', 'accz_max', 'accz_median',
                                                  'accz_interval',
-                                                 'N_mean', 'N_std', 'N_min', 'N_max', 'N_median', 'N_interval',
-                                                 'activity_type'])
-    stats_dataframe = stats_dataframe.drop(columns=['number_of_timestamps', 'recording_duration', 'steps_count'])
+                                                 'N_mean', 'N_std', 'N_min', 'N_max', 'N_median', 'N_interval'])
 
     return stats_dataframe
 

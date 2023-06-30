@@ -8,21 +8,18 @@ def run_regression(model_path, sample_path):
     model = pickle.load(open(model_path, 'rb'))
     sample = pd.read_csv(sample_path, skiprows=5)
     sample.name = sample_path[sample_path.rfind('/'):]
-    steps_count = int(list(pd.read_csv(sample_path, skiprows=lambda x: x != 3).columns)[1])
-    sample = processing(sample, steps=steps_count)
+    sample = processing(sample)
     prediction = model.predict(sample)
     return prediction
 
 
-def processing(df, steps):
+def processing(df):
     df['N'] = df.apply(lambda x: sqrt(x['ACC X'] ** 2 + x['ACC Y'] ** 2 + x['ACC Z'] ** 2), axis=1)
-    df['steps_count'] = steps
 
     stats_df = df.describe().T
 
     number_of_timestamps = stats_df['count'][0]
     recording_duration = stats_df['max'][0] - stats_df['min'][0]
-    steps_count = stats_df['mean'][4]
 
     accx_mean = stats_df['mean'][1]
     accx_std = stats_df['std'][1]
@@ -54,21 +51,22 @@ def processing(df, steps):
 
     activity_type = 1 if 'walk' in df.name else 0
 
-    row = [number_of_timestamps, recording_duration, steps_count,
+    row = [number_of_timestamps, recording_duration,
            accx_mean, accx_std, accx_min, accx_max, accx_median, accx_interval,
            accy_mean, accy_std, accy_min, accy_max, accy_median, accy_interval,
            accz_mean, accz_std, accz_min, accz_max, accz_median, accz_interval,
            N_mean, N_std, N_min, N_max, N_median, N_interval, activity_type]
 
-    stats_dataframe = pd.DataFrame(row, columns=['number_of_timestamps', 'recording_duration', 'steps_count',
-                                                 'accx_mean', 'accx_std', 'accx_min', 'accx_max', 'accx_median',
-                                                 'accx_interval',
-                                                 'accy_mean', 'accy_std', 'accy_min', 'accy_max', 'accy_median',
-                                                 'accy_interval',
-                                                 'accz_mean', 'accz_std', 'accz_min', 'accz_max', 'accz_median',
-                                                 'accz_interval',
-                                                 'N_mean', 'N_std', 'N_min', 'N_max', 'N_median', 'N_interval',
-                                                 'activity_type'])
+    stats_dataframe = pd.DataFrame(row,
+                                   columns=['number_of_timestamps', 'recording_duration',
+                                            'accx_mean', 'accx_std', 'accx_min', 'accx_max', 'accx_median',
+                                            'accx_interval',
+                                            'accy_mean', 'accy_std', 'accy_min', 'accy_max', 'accy_median',
+                                            'accy_interval',
+                                            'accz_mean', 'accz_std', 'accz_min', 'accz_max', 'accz_median',
+                                            'accz_interval',
+                                            'N_mean', 'N_std', 'N_min', 'N_max', 'N_median', 'N_interval',
+                                            'activity_type'])
 
     return stats_dataframe
 
