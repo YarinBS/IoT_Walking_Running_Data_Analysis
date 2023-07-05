@@ -86,6 +86,7 @@ def processing(df, steps):
 def main(path):
     prediction = run_classification(model_path=r'./models/classification_model.sav', sample_path=path)
     print(f"{'walk' if prediction else 'run'}")
+    return prediction
 
 
 if __name__ == '__main__':

@@ -93,6 +93,7 @@ def processing(df):
 def main(path):
     prediction = run_regression(model_path=r'./models/regression_model.sav', sample_path=path)
     print(prediction)
+    return prediction
 
 
 if __name__ == '__main__':
