@@ -1,16 +1,35 @@
+import os
 import pickle
 import sys
 import pandas as pd
 from math import sqrt
+
+import warnings
+warnings.filterwarnings("ignore")
 
 
 def run_regression(model_path, sample_path):
     model = pickle.load(open(model_path, 'rb'))
     sample = pd.read_csv(sample_path, skiprows=5)
     sample.name = sample_path[sample_path.rfind('/'):]
+
+    good_columns = ['Time [sec]', 'ACC X', 'ACC Y', 'ACC Z']
+    columns_list = list(sample.columns)
+    for _ in range(2):
+        if columns_list != good_columns:
+            if "Unnamed: 0" in columns_list:
+                sample.columns = sample.iloc[0]
+                sample.drop(index=[0], axis=0, inplace=True)
+            else:
+                sample.columns = good_columns
+            columns_list = list(sample.columns)
+
+    for col in sample.columns:
+        sample[col] = sample[col].astype('float64')
+
     sample = processing(sample)
-    prediction = model.predict(sample)
-    return prediction
+    prediction = model.predict(sample)[0]
+    return int(prediction)
 
 
 def processing(df):
@@ -42,11 +61,11 @@ def processing(df):
     accz_median = stats_df['50%'][3]
     accz_interval = accz_max - accz_min
 
-    N_mean = stats_df['mean'][5]
-    N_std = stats_df['std'][5]
-    N_min = stats_df['min'][5]
-    N_max = stats_df['max'][5]
-    N_median = stats_df['50%'][5]
+    N_mean = stats_df['mean'][4]
+    N_std = stats_df['std'][4]
+    N_min = stats_df['min'][4]
+    N_max = stats_df['max'][4]
+    N_median = stats_df['50%'][4]
     N_interval = N_max - N_min
 
     activity_type = 1 if 'walk' in df.name else 0
@@ -57,7 +76,7 @@ def processing(df):
            accz_mean, accz_std, accz_min, accz_max, accz_median, accz_interval,
            N_mean, N_std, N_min, N_max, N_median, N_interval, activity_type]
 
-    stats_dataframe = pd.DataFrame(row,
+    stats_dataframe = pd.DataFrame([row],
                                    columns=['number_of_timestamps', 'recording_duration',
                                             'accx_mean', 'accx_std', 'accx_min', 'accx_max', 'accx_median',
                                             'accx_interval',
@@ -78,3 +97,9 @@ def main(path):
 
 if __name__ == '__main__':
     main(path=sys.argv[1])
+    # for file in os.listdir('./data'):
+    #     print(file)
+    #     try:
+    #         main(path=f"./data/{file}")
+    #     except ValueError:
+    #         continue
